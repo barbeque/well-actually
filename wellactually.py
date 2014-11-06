@@ -4,6 +4,7 @@ API_BASE = "http://api.wordnik.com:80/v4/"
 wordcache = {}
 
 def prepopulate_runtime_cache(filename):
+	global wordcache # make sure we know that the write is not a local variable
 	# load a word cache from file
 	infile = open(filename, 'r')
 	wordcache = pickle.load(infile)
