@@ -24,16 +24,24 @@ def add_word_to_cache(base_word, synonym):
 	# 	if not exists in dict, make new list with only synonym
 	# else, append
 	#	if word already in list, dump it.
+	if not base_word in wordcache.keys():
+		wordcache[base_word] = [synonym]
+	else:
+		if not synonym in wordcache[base_word]:
+			wordcache[base_word].append(synonym)
+			
 
 def fetch_word_alternative(word):
 	# get a synonym for the word and choose at random.
 	# once you've retrieved the word, cache it for later.
 	# TODO: what would be a smart way to go 'backward' (if they retrieved a -> b, don't go up to the network for b -> a)?
+	print 'no fetching yet TODO'
 
 def main():
 	if len(sys.argv) < 2:
-		print 'Usage: %s {corpus}' % sys.argv[1]
-	fp = open(sys.argv[2], 'r')
+		print 'Usage: %s {corpus}' % sys.argv[0]
+		sys.exit(1)
+	fp = open(sys.argv[1], 'r')
 	fp.close() # TODO: make better
 	# just load the word cache since we'll need it
 	if os.path.exists('cache.dat'):
