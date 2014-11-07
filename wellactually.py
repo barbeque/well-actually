@@ -1,7 +1,9 @@
 import os, sys, pickle, random, json
+import yaml
 import requests as req
 
-API_BASE = "http://api.wordnik.com:80/v4/"
+API_BASE = "http://api.wordnik.com:80/v4"
+API_KEY = ""
 wordcache = {}
 
 # CACHE FUNCTIONALITY
@@ -45,9 +47,10 @@ def fetch_word_alternative(word):
 	else:
 		# get a synonym for the word and choose at random.
 		payload = { 'word':word, 'useCanonical':False, 'relationshipTypes':'synonym', 'limitPerRelationshipType':10 }
-		r = req.get(API_BASE + '/word.json/' + word + '/relatedWords', data = json.dumps(payload))
+		url = API_BASE + '/word.json/' + word + '/relatedWords'
+		r = req.get(url, data = json.dumps(payload), params = {'api_key': API_KEY})
 		r.raise_for_status()
-		defs = json.loads(r.json())
+		defs = r.json()
 		if len(defs) < 1:
 			return None # I assume, use the original word?
 		else:
@@ -67,16 +70,30 @@ def confuse_tokens(corpus_tokens):
 	return out
 
 def main():
+	global API_KEY
 	if len(sys.argv) < 2:
 		print 'Usage: %s {corpus}' % sys.argv[0]
 		sys.exit(1)
 	fp = open(sys.argv[1], 'r')
 	fp.close() # TODO: make better
+
+	# CONFIG/AUTH
+	cfg_stream = open('config.yml', 'r')
+	config = yaml.safe_load(cfg_stream)
+	print config
+	username = config['username']
+	password = config['password']
+	API_KEY = config['api_key']
+
+	#token_response = req.get(API_BASE + '/account.json/authenticate/' + username + "?password=" + password)
+	#token_response.raise_for_status()
+	#token = json.loads(token_response.json())['token']
+
+	cfg_stream.close()
+
 	# just load the word cache since we'll need it
 	if os.path.exists('cache.dat'):
 		prepopulate_runtime_cache('cache.dat')
-
-	# TODO: login
 
 	sentence = ['my', 'stevedore', 'has', 'a', 'first', 'name', "it's", "OSCAR"]
 	confused_sentence = confuse_tokens(sentence)
