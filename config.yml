@@ -2,6 +2,11 @@ api_key: 26c42008aacc00d8c363a0408410590c716fb722ead9b0135
 # leave these words the fuck alone
 perfectly_good_words:
   - in
+  - the
+  - by
+  - on
+  - of
+  - into
 bad_results:
   - M'Ass
   - a
