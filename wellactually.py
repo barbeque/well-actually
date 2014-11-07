@@ -4,6 +4,8 @@ import requests as req
 
 API_BASE = "http://api.wordnik.com:80/v4"
 API_KEY = ""
+DO_NOT_TRANSLATE = []
+BAD_RESULTS = []
 wordcache = {}
 
 # CACHE FUNCTIONALITY
@@ -26,8 +28,9 @@ def write_runtime_cache(filename):
 
 def add_synonyms_to_cache(base_word, synonyms):
 	for synonym in synonyms:
-		add_word_to_cache(base_word, synonym)
-		add_word_to_cache(synonym, base_word) # synonyms are bidirectional.
+		if not synonym in BAD_RESULTS:
+			add_word_to_cache(base_word, synonym)
+			add_word_to_cache(synonym, base_word) # synonyms are bidirectional.
 
 def add_word_to_cache(base_word, synonym):
 	# check if word exists in dict
@@ -42,6 +45,9 @@ def add_word_to_cache(base_word, synonym):
 
 
 def fetch_word_alternative(word):
+	if word in DO_NOT_TRANSLATE:
+		return word	# leave it.
+
 	if word in wordcache.keys():
 		return random.choice(wordcache[word])
 	else:
@@ -57,7 +63,9 @@ def fetch_word_alternative(word):
 			words_list = defs[0]['words']
 			# once you've retrieved the word, cache it for later.
 			add_synonyms_to_cache(word, words_list)
-			return random.choice(words_list)
+			# offer a fuzzy chance for the original word to fall out again too.
+			# otherwise it tends to be pretty unreadable.
+			return random.choice(words_list + [word] + [word])
 
 def confuse_tokens(corpus_tokens):
 	out = []
@@ -84,6 +92,9 @@ def match_casing_of_existing_word(old_word, new_word):
 
 def main():
 	global API_KEY
+	global BAD_RESULTS
+	global DO_NOT_TRANSLATE
+
 	if len(sys.argv) < 2:
 		print 'Usage: %s {corpus}' % sys.argv[0]
 		sys.exit(1)
@@ -97,6 +108,8 @@ def main():
 	cfg_stream = open('config.yml', 'r')
 	config = yaml.safe_load(cfg_stream)
 	API_KEY = config['api_key']
+	DO_NOT_TRANSLATE = config['perfectly_good_words']
+	DISPOSE_OF_RESULTS = config['bad_results']
 	cfg_stream.close()
 
 	# just load the word cache since we'll need it
@@ -105,8 +118,10 @@ def main():
 
 	sentence = corpus.split()
 	confused_sentence = confuse_tokens(sentence)
-	print 'Original %s' % " ".join(sentence)
-	print 'Twisted! %s' % " ".join(confused_sentence)
+	print 'Original'
+	print " ".join(sentence) + '\n'
+	print 'Twisted!'
+	print " ".join(confused_sentence) + '\n'
 
 	# we're done here, so write the cache back out
 	write_runtime_cache('cache.dat')
