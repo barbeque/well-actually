@@ -46,9 +46,9 @@ def fetch_word_alternative(word):
 		return random.choice(wordcache[word])
 	else:
 		# get a synonym for the word and choose at random.
-		payload = { 'word':word, 'useCanonical':False, 'relationshipTypes':'synonym', 'limitPerRelationshipType':10 }
+		params = { 'word': word, 'useCanonical': False, 'relationshipTypes': 'synonym', 'limitPerRelationshipType': 10, 'api_key': API_KEY }
 		url = API_BASE + '/word.json/' + word + '/relatedWords'
-		r = req.get(url, data = json.dumps(payload), params = {'api_key': API_KEY})
+		r = req.get(url, params = params)
 		r.raise_for_status()
 		defs = r.json()
 		if len(defs) < 1:
@@ -80,14 +80,7 @@ def main():
 	# CONFIG/AUTH
 	cfg_stream = open('config.yml', 'r')
 	config = yaml.safe_load(cfg_stream)
-	print config
-	username = config['username']
-	password = config['password']
 	API_KEY = config['api_key']
-
-	#token_response = req.get(API_BASE + '/account.json/authenticate/' + username + "?password=" + password)
-	#token_response.raise_for_status()
-	#token = json.loads(token_response.json())['token']
 
 	cfg_stream.close()
 
