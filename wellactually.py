@@ -47,11 +47,18 @@ def add_word_to_cache(base_word, synonym):
 
 
 def fetch_word_alternative(word):
+	append_comma_on_exit = False # TODO: do a lambda for 'reverse transform' instead of all these flags.
+	
 	if word in DO_NOT_TRANSLATE:
 		return word	# leave it.
 
+	if word.endswith(','):
+		# HACK
+		append_comma_on_exit = True
+		word = word[:-1]
+
 	if word in wordcache.keys():
-		return random.choice(wordcache[word])
+		return transform_output_word(random.choice(wordcache[word]), append_comma_on_exit)
 	else:
 		# get a synonym for the word and choose at random.
 		params = { 'word': word, 'useCanonical': False, 'relationshipTypes': 'synonym', 'limitPerRelationshipType': 10, 'api_key': API_KEY }
@@ -67,7 +74,12 @@ def fetch_word_alternative(word):
 			add_synonyms_to_cache(word, words_list)
 			# offer a fuzzy chance for the original word to fall out again too.
 			# otherwise it tends to be pretty unreadable.
-			return random.choice(wordcache[word] + [word] + [word])
+			return transform_output_word(random.choice(wordcache[word] + [word] + [word]), append_comma_on_exit)
+
+def transform_output_word(root_word, had_comma):
+	if had_comma:
+		return root_word + ','
+	return root_word
 
 def confuse_tokens(corpus_tokens):
 	out = []
