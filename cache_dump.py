@@ -5,4 +5,4 @@ words = pickle.loads(fp.read())
 fp.close()
 
 for word in words:
-	print '%s -> %s' % (word, ', '.join(words))
+	print '%s -> %s' % (word, ', '.join(words[word]))
