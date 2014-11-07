@@ -47,18 +47,13 @@ def add_word_to_cache(base_word, synonym):
 
 
 def fetch_word_alternative(word):
-	append_comma_on_exit = False # TODO: do a lambda for 'reverse transform' instead of all these flags.
-	
 	if word in DO_NOT_TRANSLATE:
 		return word	# leave it.
 
-	if word.endswith(','):
-		# HACK
-		append_comma_on_exit = True
-		word = word[:-1]
+	(word, punct) = remove_punctuation(word)
 
 	if word in wordcache.keys():
-		return transform_output_word(random.choice(wordcache[word]), append_comma_on_exit)
+		return transform_output_word(random.choice(wordcache[word]), punct)
 	else:
 		# get a synonym for the word and choose at random.
 		params = { 'word': word, 'useCanonical': False, 'relationshipTypes': 'synonym', 'limitPerRelationshipType': 10, 'api_key': API_KEY }
@@ -74,12 +69,19 @@ def fetch_word_alternative(word):
 			add_synonyms_to_cache(word, words_list)
 			# offer a fuzzy chance for the original word to fall out again too.
 			# otherwise it tends to be pretty unreadable.
-			return transform_output_word(random.choice(wordcache[word] + [word] + [word]), append_comma_on_exit)
+			return transform_output_word(random.choice(wordcache[word] + [word] + [word]), punct)
 
-def transform_output_word(root_word, had_comma):
-	if had_comma:
-		return root_word + ','
-	return root_word
+def remove_punctuation(word):
+	punctuations = ['.', ',', ';', ':', '-']
+	# todo: braces?
+	if any(word.endswith(p) for p in punctuations):
+		punct = next(p for p in punctuations if word.endswith(p)) # don't do this op twice
+		return (word[:-1], punct)
+	return (word, None)
+
+def transform_output_word(root_word, old_trailing_punct):
+	# TODO: do this with lambdas
+	return root_word + (old_trailing_punct if old_trailing_punct is not None else '')
 
 def confuse_tokens(corpus_tokens):
 	out = []
