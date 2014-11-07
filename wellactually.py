@@ -81,7 +81,6 @@ def main():
 	cfg_stream = open('config.yml', 'r')
 	config = yaml.safe_load(cfg_stream)
 	API_KEY = config['api_key']
-
 	cfg_stream.close()
 
 	# just load the word cache since we'll need it
