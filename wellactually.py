@@ -31,6 +31,8 @@ def add_synonyms_to_cache(base_word, synonyms):
 		if not synonym in BAD_RESULTS:
 			add_word_to_cache(base_word, synonym)
 			add_word_to_cache(synonym, base_word) # synonyms are bidirectional.
+		else:
+			print 'rejected ' + synonym
 
 def add_word_to_cache(base_word, synonym):
 	# check if word exists in dict
@@ -65,7 +67,7 @@ def fetch_word_alternative(word):
 			add_synonyms_to_cache(word, words_list)
 			# offer a fuzzy chance for the original word to fall out again too.
 			# otherwise it tends to be pretty unreadable.
-			return random.choice(words_list + [word] + [word])
+			return random.choice(wordcache[word] + [word] + [word])
 
 def confuse_tokens(corpus_tokens):
 	out = []
@@ -109,7 +111,7 @@ def main():
 	config = yaml.safe_load(cfg_stream)
 	API_KEY = config['api_key']
 	DO_NOT_TRANSLATE = config['perfectly_good_words']
-	DISPOSE_OF_RESULTS = config['bad_results']
+	BAD_RESULTS = config['bad_results']
 	cfg_stream.close()
 
 	# just load the word cache since we'll need it
