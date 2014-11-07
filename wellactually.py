@@ -64,10 +64,23 @@ def confuse_tokens(corpus_tokens):
 	for token in corpus_tokens:
 		alt = fetch_word_alternative(token)
 		if alt is not None:
-			out.append(alt) # use the synonym
+			out.append(match_casing_of_existing_word(token, alt)) # use the synonym
 		else:
 			out.append(token) # no synonym for this word existed, so whatever
 	return out
+
+def match_casing_of_existing_word(old_word, new_word):
+	# this is probably more work than it's worth.. i guess look at the word and figure out if it's:
+	#	1. capitalized at the front (Title case)
+	#	2. all caps (SHOUTING CASE)
+	#	3. never capitalized (the way i like to see things)
+	#	4. mixed case (sTatiSTicalAnomalies) - it's not the 80s, nobody writes like this anymore.
+	if old_word.istitle():
+		return new_word.title()
+	elif old_word.isupper():
+		return new_word.upper()
+	else:
+		return new_word.lower() # why not
 
 def main():
 	global API_KEY
@@ -87,7 +100,7 @@ def main():
 	if os.path.exists('cache.dat'):
 		prepopulate_runtime_cache('cache.dat')
 
-	sentence = ['my', 'stevedore', 'has', 'a', 'first', 'name', "it's", "OSCAR"]
+	sentence = ['My', 'stevedore', 'has', 'a', 'first', 'name', "it's", "OSCAR"]
 	confused_sentence = confuse_tokens(sentence)
 	print 'Original %s' % " ".join(sentence)
 	print 'Twisted! %s' % " ".join(confused_sentence)
