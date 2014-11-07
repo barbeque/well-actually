@@ -88,6 +88,9 @@ def main():
 		print 'Usage: %s {corpus}' % sys.argv[0]
 		sys.exit(1)
 	fp = open(sys.argv[1], 'r')
+
+	corpus = fp.read()
+
 	fp.close() # TODO: make better
 
 	# CONFIG/AUTH
@@ -100,7 +103,7 @@ def main():
 	if os.path.exists('cache.dat'):
 		prepopulate_runtime_cache('cache.dat')
 
-	sentence = ['My', 'stevedore', 'has', 'a', 'first', 'name', "it's", "OSCAR"]
+	sentence = corpus.split()
 	confused_sentence = confuse_tokens(sentence)
 	print 'Original %s' % " ".join(sentence)
 	print 'Twisted! %s' % " ".join(confused_sentence)
