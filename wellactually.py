@@ -1,4 +1,5 @@
 import sys, pickle
+import requests as req
 
 API_BASE = "http://api.wordnik.com:80/v4/"
 wordcache = {}
@@ -36,7 +37,7 @@ def fetch_word_alternative(word):
 	# get a synonym for the word and choose at random.
 	# once you've retrieved the word, cache it for later.
 	# TODO: what would be a smart way to go 'backward' (if they retrieved a -> b, don't go up to the network for b -> a)?
-	print 'no fetching yet TODO'
+	print 'todo'
 
 def main():
 	if len(sys.argv) < 2:
